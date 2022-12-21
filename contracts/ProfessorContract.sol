@@ -29,7 +29,7 @@ contract ProfessorContract is IProfessorContract {
     modifier onlyProfessor(uint256 disciplinaId) {
         require(
             address(
-                IDisciplinaContract(_disciplinaContractAddr)
+                Academic(_academicContractAddr)
                     .getDisciplinaById(disciplinaId)
                     .professor
             ) != address(0),
@@ -64,12 +64,12 @@ contract ProfessorContract is IProfessorContract {
         uint8 nota
     ) public override onlyProfessor(disciplinaId) {
         require(
-            bytes(IAlunoContract(_alunoContractAddr).getAlunoById(alunoId).nome)
+            bytes(Academic(_academicContractAddr).getAlunoById(alunoId).nome)
                 .length != 0,
             "Aluno nao existente!"
         );
          require(
-            bytes(IDisciplinaContract(_disciplinaContractAddr).getDisciplinaById(disciplinaId).nome)
+            bytes(Academic(_academicContractAddr).getDisciplinaById(disciplinaId).nome)
                 .length != 0,
             "Disciplina nao existente!"
         );

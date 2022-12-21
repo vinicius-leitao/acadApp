@@ -19,6 +19,7 @@ contract Academic {
     mapping(uint256 => Disciplina) disciplinaById;
     mapping(uint256 => uint256[]) alunosByDisciplina;
     mapping(uint256 => Professor) professorById;
+    mapping(uint => Aluno) alunoById;
 
     address owner;
     address _alunoContractAddr;
@@ -75,9 +76,28 @@ contract Academic {
         return professorById[id];
     }
 
+    function getDisciplinaById(uint id) public view returns (Disciplina memory){
+        return disciplinaById[id];
+    }
+
+    function inserirDisciplina(uint id, string memory nome, address professor, uint idProfessor) onlyOwner public {
+       require(etapa == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno");
+       require(bytes(getProfessorById(idProfessor).nome).length != 0, "Professor nao existente");
+       
+       disciplinaById[id] = Disciplina(id, nome, professor, idProfessor);
+    }
+
+    function getAlunoById(uint id) public view returns (Aluno memory){
+        return alunoById[id];
+    }
+
+    function inserirAluno(uint id, string memory nome) onlyOwner public  {
+       require(etapa == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno/professores");
+       require(id != 0, "Necessario um id de aluno");
+       alunoById[id] = Aluno(id, nome);
+    }
+
     function abrirLancamentoNota() public onlyOwner {
         etapa = Periodo.LANCAMENTO_NOTAS;
     }
-
-
 }
