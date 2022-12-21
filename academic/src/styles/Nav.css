@@ -1,0 +1,40 @@
+#nav-container{
+    padding: 0;
+    margin: 0;
+    width: 30vh;
+    height: 100%;
+    background-color: #191622;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#navlink{
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+}
+
+#appname{
+    color: white;
+    font-size: 32px;
+    padding: 0 0 4vh 4vh;
+}
+
+#appspan{
+    display: inline-block;
+    margin-left: 1vh;
+}
+
+.nav-tab{
+    text-decoration: none;
+    color: white;
+    padding: 4vh 0 4vh 5vh;
+    transition: all ease .5s;
+    justify-self: center;
+}
+
+.nav-tab:hover{
+    background-color: rgba(65, 65, 77, 0.8);
+    transition: all ease .5s;
+}
