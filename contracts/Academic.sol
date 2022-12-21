@@ -18,6 +18,7 @@ contract Academic {
     mapping(uint256 => mapping(uint256 => uint8)) alunoIdToDisciplinaIdToNota;
     mapping(uint256 => Disciplina) disciplinaById;
     mapping(uint256 => uint256[]) alunosByDisciplina;
+    mapping(uint256 => Professor) professorById;
 
     address owner;
     address _alunoContractAddr;
@@ -28,8 +29,6 @@ contract Academic {
         etapa = Periodo.INSCRICAO_ALUNOS_E_PROFESSORES;
         owner = msg.sender;
     }
-
-    event InsereNota(uint disciplinaId, address professor);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Nao autorizado");
@@ -57,7 +56,28 @@ contract Academic {
         _professorContractAddr = professorContractAddr;
     }
 
+    function inserirProfessor(uint256 id, string memory nome)
+        public
+        onlyOwner
+    {
+        require(
+            etapa == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES,
+            "Fora do periodo de inscricao de alunos/professores!"
+        );
+        professorById[id] = Professor(id, nome);
+    }
+    
+    function getProfessorById(uint256 id)
+        public
+        view
+        returns (Professor memory)
+    {
+        return professorById[id];
+    }
+
     function abrirLancamentoNota() public onlyOwner {
         etapa = Periodo.LANCAMENTO_NOTAS;
     }
+
+
 }

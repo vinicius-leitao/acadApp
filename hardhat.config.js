@@ -7,5 +7,6 @@ module.exports = {
     local: {
       url: 'http://localhost:8545'
     },
-  }
+  },
+  paths: {artifacts: "./academic/src/artifacts"}
 };

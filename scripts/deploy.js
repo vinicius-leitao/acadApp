@@ -67,18 +67,18 @@ async function main() {
 
   console.log(`Deploy finished with success!`);
 
-  const resultInserirProfessor = await professorContract.inserirProfessor(
+  const resultInserirProfessor = await academic.inserirProfessor(
     1,
     "Diogo"
   );
   await resultInserirProfessor.wait(1);
-  const resultInserirProfessor2 = await professorContract.inserirProfessor(
+  const resultInserirProfessor2 = await academic.inserirProfessor(
     2,
     "Myrna"
   );
   await resultInserirProfessor2.wait(1);
-  console.log(await professorContract.getProfessorById(1));
-  console.log(await professorContract.getProfessorById(2));
+  console.log(await academic.getProfessorById(1));
+  console.log(await academic.getProfessorById(2));
 
   const resultInserirDisciplina = await disciplinaContract.inserirDisciplina(
     1,
@@ -112,6 +112,14 @@ async function main() {
   const resultInserirNota = await professorContract.inserirNota(1, 1, 5);
   await resultInserirNota.wait(1);
   console.log(resultInserirNota);
+
+  const resultInserirNota2 = await professorContract.inserirNota(2, 1, 7);
+  await resultInserirNota2.wait(1);
+  console.log(resultInserirNota2);
+
+  const resultListarNotas = await professorContract.listarNotasDisciplina(1);
+  console.log(resultListarNotas);
+  
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -3,11 +3,38 @@
     flex-direction: column;
     width: 40vh;
     height: 20vh;
-    background-color: #44475a;
+    background-color: #E1E1E6;
     border-radius: 15px;
     align-items: center;
+    justify-content: center;
 }
 
 .card-container h2{
-    color: #E1E1E6;
+    color: #44475a;
+}
+
+.card-input{
+    border: none;
+    outline: none;
+    width: 28vh;
+    padding: 1vh .5vh;
+    border-radius: 5px;
+}
+
+.card-button{
+    border: none;
+    outline: none;
+    background-color: #483C67;
+    color: white;
+    margin-top: 2vh;
+    padding: 1vh 2vh;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all ease .5s;
+}
+
+.card-button:hover{
+    background-color: #251f35;
+    transition: all ease .5s;
+    cursor: pointer;
 }

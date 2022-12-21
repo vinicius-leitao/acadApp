@@ -49,26 +49,6 @@ contract ProfessorContract is IProfessorContract {
         owner = msg.sender;
     }
 
-    function getProfessorById(uint256 id)
-        public
-        view
-        override
-        returns (Professor memory)
-    {
-        return professorById[id];
-    }
-
-    function inserirProfessor(uint256 id, string memory nome)
-        public
-        override
-        onlyOwner
-    {
-        require(
-            Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES,
-            "Fora do periodo de inscricao de alunos/professores!"
-        );
-        professorById[id] = Professor(id, nome);
-    }
 
     function setProfessor(uint256 id, Professor memory professor)
         public
