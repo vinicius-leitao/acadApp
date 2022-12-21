@@ -73,8 +73,6 @@ describe("Academic", function () {
             expect(notas[0]).to.equal(8);
 
         });
-
-
         
 
     });

@@ -31,7 +31,7 @@ contract DisciplinaContract is IDisciplinaContract{
     }
 
     function inserirDisciplina(uint id, string memory nome, address professor, uint idProfessor) onlyOwner public override {
-       require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS, "Fora do periodo de inscricao de aluno");
+       require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno");
        require(bytes(IProfessorContract(professor).getProfessorById(idProfessor).nome).length != 0, "Professor nao existente");
        
        disciplinaById[id] = Disciplina(id, nome, professor, idProfessor);
