@@ -89,6 +89,7 @@ contract ProfessorContract is IProfessorContract {
         public
         view
         override
+        onlyProfessor(disciplinaId)
         returns (Aluno[] memory, uint8[] memory)
     {
         uint256 numAlunos = alunosByDisciplina[disciplinaId].length;
