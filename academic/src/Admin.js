@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import './styles/Content.css';
 
 const AcademicAbi = require("./artifacts/contracts/Academic.sol/Academic.json").abi;
-const AcademicTokenAbi = require('./artifacts/contracts/AcademicToken.sol/AcademicToken.json').abi;
 
 const Admin = () => {
 
@@ -26,10 +25,10 @@ const Admin = () => {
       setSignerAddress(await signer2.getAddress())
       const academicContract = new ethers.Contract(AcademicAddr, AcademicAbi, provider);
       setContract(academicContract.connect(signer2));
+      
     }
 
     connect();
-
   }, [signer, signerAddress]);
 
   const abrirLancamentoNotas = async (e) => {
@@ -46,8 +45,33 @@ const Admin = () => {
     const [idProfessor, nomeProfessor] = data.split(',')
     if(idProfessor != "" && nomeProfessor != ""){
       const resultInserirProfessor = await contract.inserirProfessor(parseInt(idProfessor), nomeProfessor);
-      resultInserirProfessor.wait(1);
-      console.log(resultInserirProfessor);
+      const result = resultInserirProfessor.wait(1);
+      console.log(result);
+    }
+  }
+
+  const inserirAluno = async (e) => {
+    e.preventDefault();
+    const input = document.getElementsByClassName('card-input')[1]
+    const data = input.value
+    const [idAluno, nomeAluno] = data.split(',')
+    if(idAluno != "" && nomeAluno != ""){
+      const resultInserirAluno = await contract.inserirAluno(parseInt(idAluno), nomeAluno);
+      resultInserirAluno.wait(1);
+      console.log(resultInserirAluno);
+    }
+    
+  }
+
+  const inserirDisciplina = async (e) => {
+    e.preventDefault();
+    const input = document.getElementsByClassName('card-input')[2]
+    const data = input.value
+    const [idDisciplina, nomeDisciplina, addressProfessor, idProfessor] = data.split(',')
+    if(idDisciplina != "" && nomeDisciplina != "" && addressProfessor != "" && idProfessor != ""){
+      const resultInserirDisciplina = await contract.inserirDisciplina(parseInt(idDisciplina), nomeDisciplina, addressProfessor, parseInt(idProfessor));
+      resultInserirDisciplina.wait(1);
+      console.log(resultInserirDisciplina);
     }
     
   }
@@ -61,8 +85,8 @@ const Admin = () => {
         <div className='optionsAvailable'>
           <Card props={{ functionName: "Abrir lançamento de notas" }} action={abrirLancamentoNotas} type="button"></Card>
           <Card props={{ functionName: "Inserir Professor" }} action={inserirProfessor} type="input"></Card>
-          <Card props={{ functionName: "Inserir Aluno" }}></Card>
-          <Card props={{ functionName: "Inserir Disciplina" }}></Card>
+          <Card props={{ functionName: "Inserir Aluno" }} action={inserirAluno} type="input"></Card>
+          <Card props={{ functionName: "Inserir Disciplina" }} action={inserirDisciplina} type="input"></Card>
         </div>
       </div>
     );

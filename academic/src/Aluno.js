@@ -8,7 +8,7 @@ const Aluno = () =>{
     <div id="content-container">
       <h1 className='content-title'>Página do aluno</h1>
       <div className='optionsAvailable'>
-        <Card props={{functionName: "Aluno é um inutil"}}></Card>
+        <Card props={{functionName: "Função aluno"}}></Card>
       </div>
     </div>
   );
