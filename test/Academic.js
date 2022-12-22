@@ -5,6 +5,10 @@ const {
 
 describe("Academic", function () {
 
+    // this.beforeEach(() => {
+        
+    // })
+    
     async function deployContracts() {
         const AcademicUtils = await hre.ethers.getContractFactory("AcademicUtils");
         const academicUtils = await AcademicUtils.deploy();
@@ -13,11 +17,13 @@ describe("Academic", function () {
             `AcademicUtils contract deployed to ${academicUtils.address}`
         );
 
-        const Academic = await hre.ethers.getContractFactory("Academic", {
-            libraries: {
-            AcademicUtils: academicUtils.address,
-            },
-        });
+        const Academic = await hre.ethers.getContractFactory("Academic"
+        // , {
+        //         libraries: {
+        //         AcademicUtils: academicUtils.address,
+        //         },
+        //     }
+        );
         const academic = await Academic.deploy();
         await academic.deployed();
 
@@ -32,8 +38,15 @@ describe("Academic", function () {
             `AlunoContract contract deployed to ${alunoContract.address}`
         );
 
+        const DisciplinaContract = await hre.ethers.getContractFactory("DisciplinaContract");
+        const disciplinaContract = await DisciplinaContract.deploy(academic.address);
+        await disciplinaContract.deployed();
+        console.log(
+            `DisciplinaContract contract deployed to ${disciplinaContract.address}`
+        );
+
         const ProfessorContract = await hre.ethers.getContractFactory("ProfessorContract");
-        const professorContract = await ProfessorContract.deploy(academic.address);
+        const professorContract = await ProfessorContract.deploy(academic.address, alunoContract.address, disciplinaContract.address);
         await professorContract.deployed();
         console.log(
             `ProfessorContract contract deployed to ${professorContract.address}`
@@ -42,10 +55,26 @@ describe("Academic", function () {
         const result = await academic.setAlunoContractAddress(alunoContract.address);
         await result.wait(1);
         console.log(
+            `Changed AlunoContract address in Academic with success!`
+        );
+
+        const resultDisciplina = await academic.setDisciplinaContractAddress(disciplinaContract.address);
+        await resultDisciplina.wait(1);
+        console.log(
+            `Changed DisciplinaContract address in Academic with success!`
+        );
+
+        const resultProfessor = await academic.setProfessorContractAddress(professorContract.address);
+        await resultProfessor.wait(1);
+        console.log(
+            `Changed ProfessorContract address in Academic with success!`
+        );
+
+        console.log(
             `Deploy finished with success!`
         );
 
-        return {academic, alunoContract, professorContract};
+        return {academic, alunoContract, professorContract, disciplinaContract};
     }
 
 
