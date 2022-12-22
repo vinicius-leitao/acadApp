@@ -29,7 +29,7 @@ contract ProfessorContract is IProfessorContract {
     modifier onlyProfessor(uint256 disciplinaId) {
         require(
             address(
-                IDisciplinaContract(_disciplinaContractAddr)
+                Academic(_academicContractAddr)
                     .getDisciplinaById(disciplinaId)
                     .professor
             ) != address(0),
@@ -49,26 +49,6 @@ contract ProfessorContract is IProfessorContract {
         owner = msg.sender;
     }
 
-    function getProfessorById(uint256 id)
-        public
-        view
-        override
-        returns (Professor memory)
-    {
-        return professorById[id];
-    }
-
-    function inserirProfessor(uint256 id, string memory nome)
-        public
-        override
-        onlyOwner
-    {
-        require(
-            Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES,
-            "Fora do periodo de inscricao de alunos/professores!"
-        );
-        professorById[id] = Professor(id, nome);
-    }
 
     function setProfessor(uint256 id, Professor memory professor)
         public
@@ -84,12 +64,12 @@ contract ProfessorContract is IProfessorContract {
         uint8 nota
     ) public override onlyProfessor(disciplinaId) {
         require(
-            bytes(IAlunoContract(_alunoContractAddr).getAlunoById(alunoId).nome)
+            bytes(Academic(_academicContractAddr).getAlunoById(alunoId).nome)
                 .length != 0,
             "Aluno nao existente!"
         );
          require(
-            bytes(IDisciplinaContract(_disciplinaContractAddr).getDisciplinaById(disciplinaId).nome)
+            bytes(Academic(_academicContractAddr).getDisciplinaById(disciplinaId).nome)
                 .length != 0,
             "Disciplina nao existente!"
         );

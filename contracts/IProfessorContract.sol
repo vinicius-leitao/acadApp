@@ -6,11 +6,7 @@ import "./AcademicTypes.sol";
 
 interface IProfessorContract{
 
-    function inserirProfessor(uint id, string memory nome) external;
-
     function setProfessor(uint id, Professor memory professor) external;
-
-    function getProfessorById(uint id) external view returns (Professor memory);
 
     function listarNotasDisciplina(uint disciplinaId) external view returns(Aluno[] memory, uint8[] memory);
 

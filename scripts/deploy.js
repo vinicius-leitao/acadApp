@@ -67,44 +67,44 @@ async function main() {
 
   console.log(`Deploy finished with success!`);
 
-  const resultInserirProfessor = await professorContract.inserirProfessor(
+  const resultInserirProfessor = await academic.inserirProfessor(
     1,
     "Diogo"
   );
   await resultInserirProfessor.wait(1);
-  const resultInserirProfessor2 = await professorContract.inserirProfessor(
+  const resultInserirProfessor2 = await academic.inserirProfessor(
     2,
     "Myrna"
   );
   await resultInserirProfessor2.wait(1);
-  console.log(await professorContract.getProfessorById(1));
-  console.log(await professorContract.getProfessorById(2));
+  console.log(await academic.getProfessorById(1));
+  console.log(await academic.getProfessorById(2));
 
-  const resultInserirDisciplina = await disciplinaContract.inserirDisciplina(
+  const resultInserirDisciplina = await academic.inserirDisciplina(
     1,
     "Blockchain",
     "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
     1
   );
   await resultInserirDisciplina.wait(1);
-  console.log(await disciplinaContract.getDisciplinaById(1));
+  console.log(await academic.getDisciplinaById(1));
 
-  const resultInserirDisciplina2 = await disciplinaContract.inserirDisciplina(
+  const resultInserirDisciplina2 = await academic.inserirDisciplina(
     2,
     "EDA",
     "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
     2
   );
   await resultInserirDisciplina2.wait(1);
-  console.log(await disciplinaContract.getDisciplinaById(2));
+  console.log(await academic.getDisciplinaById(2));
 
-  const resultInserirAluno = await alunoContract.inserirAluno(1, "Vinícius");
+  const resultInserirAluno = await academic.inserirAluno(1, "Vinícius");
   await resultInserirAluno.wait(1);
-  console.log(await alunoContract.getAlunoById(1));
+  console.log(await academic.getAlunoById(1));
 
-  const resultInserirAluno2 = await alunoContract.inserirAluno(2, "Lucas");
+  const resultInserirAluno2 = await academic.inserirAluno(2, "Lucas");
   await resultInserirAluno2.wait(1);
-  console.log(await alunoContract.getAlunoById(2));
+  console.log(await academic.getAlunoById(2));
 
   const resultAbrirNotas = await academic.abrirLancamentoNota();
   await resultAbrirNotas.wait(1);
@@ -112,6 +112,14 @@ async function main() {
   const resultInserirNota = await professorContract.inserirNota(1, 1, 5);
   await resultInserirNota.wait(1);
   console.log(resultInserirNota);
+
+  const resultInserirNota2 = await professorContract.inserirNota(2, 1, 7);
+  await resultInserirNota2.wait(1);
+  console.log(resultInserirNota2);
+
+  const resultListarNotas = await professorContract.listarNotasDisciplina(1);
+  console.log(resultListarNotas);
+  
 }
 
 // We recommend this pattern to be able to use async/await everywhere
