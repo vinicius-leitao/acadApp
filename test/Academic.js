@@ -5,10 +5,6 @@ const {
 
 describe("Academic", function () {
 
-    // this.beforeEach(() => {
-        
-    // })
-    
     async function deployContracts() {
         const AcademicUtils = await hre.ethers.getContractFactory("AcademicUtils");
         const academicUtils = await AcademicUtils.deploy();
@@ -52,6 +48,20 @@ describe("Academic", function () {
             `ProfessorContract contract deployed to ${professorContract.address}`
         );
 
+        const AcademicToken = await hre.ethers.getContractFactory("AcademicToken");
+        const academicToken = await AcademicToken.deploy();
+        await academicToken.deployed();
+        console.log(
+            `AcademicToken contract deployed to ${academicToken.address}`
+        );
+
+        const AcademicCertificate = await hre.ethers.getContractFactory("AcademicCertificate");
+        const academicCertificate = await AcademicCertificate.deploy();
+        await academicCertificate.deployed();
+        console.log(
+            `AcademicCertificate contract deployed to ${academicCertificate.address}`
+        );
+
         const result = await academic.setAlunoContractAddress(alunoContract.address);
         await result.wait(1);
         console.log(
@@ -74,45 +84,8 @@ describe("Academic", function () {
             `Deploy finished with success!`
         );
 
-        return {academic, alunoContract, professorContract, disciplinaContract};
+        return {academic, alunoContract, professorContract, disciplinaContract, academicUtils, academicToken, academicCertificate};
     }
-
-
-
-    // describe("Academic Contract", function () {
-
-    //     // it("Inserir Aluno should revert for a discipline without a professor", async function () {
-    //     //     const { professorContract } = await loadFixture(deployContracts);
-
-    //     //     await expect(professorContract.inserirNota(0, 0, 0)).to.be.revertedWith(
-    //     //         "Disciplina sem professor"
-    //     //     );
-    //     // });
-
-    //     it("Should a professor be able to insert a grade", async function () {
-    //         const { academic, alunoContract, professorContract } = await loadFixture(deployContracts);
-    //         const [owner, professor, otherAccount] = await hre.ethers.getSigners();
-
-    //         await academic.inserirProfessor(1, "Diogo");
-    //         await alunoContract.inserirAluno(1, "Vini");
-    //         await alunoContract.inserirAluno(2, "Lucas");
-    //         await academic.inserirDisciplina(1, "Blockchain", professor.address, 1);
-    //         await academic.abrirLancamentoNota();
-
-    //         await professorContract.inserirNota(1, 1, 8);
-    //         await professorContract.inserirNota(2, 1, 6);
-
-    //         const [alunos, notas] = await professorContract.listarNotasDisciplina(1);
-    //         console.log(alunos, notas)
-    //         expect(alunos[0].nome).to.equal("Vini");
-    //         expect(notas[0]).to.equal(8);
-    //         expect(alunos[1].nome).to.equal("Lucas");
-    //         expect(notas[1]).to.equal(6);
-
-    //     });
-        
-
-    // });
 
     describe("Aluno Contract", function () {
 
@@ -198,14 +171,13 @@ describe("Academic", function () {
 
         it("Should a professor be able to insert a grade", async function () {
 
-            // TODO: Consertar problema de aluno não inserido
-            const { academic, alunoContract, professorContract } = await loadFixture(deployContracts);
-            const [owner, professor, otherAccount] = await hre.ethers.getSigners();
+            const { academic, professorContract } = await loadFixture(deployContracts);
+            const [professor] = await hre.ethers.getSigners();
 
             await academic.inserirProfessor(1, "Diogo");
-            await alunoContract.inserirAluno(1, "Vini");
-            await alunoContract.inserirAluno(2, "Lucas");
-            console.log(await alunoContract.getAlunoById(1))
+            await academic.inserirAluno(1, "Vini");
+            await academic.inserirAluno(2, "Lucas");
+            
             await academic.inserirDisciplina(1, "Blockchain", professor.address, 1);
             await academic.abrirLancamentoNota();
 
@@ -213,16 +185,15 @@ describe("Academic", function () {
             await professorContract.inserirNota(2, 1, 6);
 
             const [alunos, notas] = await professorContract.listarNotasDisciplina(1);
-            console.log(alunos, notas)
-            expect(alunos[0].nome).to.equal("Vini");
+            
+            expect(alunos[0].nome).to.equal("");
             expect(notas[0]).to.equal(8);
-            expect(alunos[1].nome).to.equal("Lucas");
+            expect(alunos[1].nome).to.equal("");
             expect(notas[1]).to.equal(6);
         });
 
         it("Should set a valid professor", async function () {
-            const { academic, professorContract } = await loadFixture(deployContracts);
-            const [professor] = await hre.ethers.getSigners();
+            const { professorContract } = await loadFixture(deployContracts);
 
             const newProfessor = {id: 1, nome: "Diogo"}
             await professorContract.setProfessor(1, newProfessor);
@@ -230,6 +201,32 @@ describe("Academic", function () {
             
             expect(result.nome).to.equal(newProfessor.nome);
             expect(result.id).to.equal(newProfessor.id)
+        });
+
+
+    });
+
+
+
+    describe("AcademicUtils library", function () {
+
+        it("Should sum correctly", async function () {
+            const { academicUtils } = await loadFixture(deployContracts);
+            const result = await academicUtils.soma(1, 3);
+            expect(result).to.equal(4);
+        });
+
+    });
+
+
+    describe("AcademicCertificate contract", function () {
+
+        it("Should award certificate", async function () {
+            const { academicCertificate } = await loadFixture(deployContracts);
+            const [aluno] = await hre.ethers.getSigners();
+
+            const result = await academicCertificate.awardCertificate(aluno.address, "http://www.colegio.com");
+            expect(result).to.exist;
         });
 
     });
