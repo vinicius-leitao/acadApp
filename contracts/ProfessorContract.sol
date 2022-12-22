@@ -49,6 +49,9 @@ contract ProfessorContract is IProfessorContract {
         owner = msg.sender;
     }
 
+    function getProfessor(uint id) public view returns (Professor memory){
+        return professorById[id];
+    }
 
     function setProfessor(uint256 id, Professor memory professor)
         public
