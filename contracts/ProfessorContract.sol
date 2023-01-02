@@ -45,7 +45,6 @@ contract ProfessorContract is IProfessorContract {
         owner = msg.sender;
     }
 
-<<<<<<< HEAD
     function inserirProfessor(uint256 id, string memory nome, address professorAddress) public override onlyAdmin  {
         require(
             Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES,
@@ -60,9 +59,6 @@ contract ProfessorContract is IProfessorContract {
         view
         returns (Professor memory)
     {
-=======
-    function getProfessor(uint id) public view returns (Professor memory){
->>>>>>> 305502929cae14af480f62eb523ae5430fdeec78
         return professorById[id];
     }
 
