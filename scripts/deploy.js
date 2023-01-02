@@ -4,10 +4,11 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
+const { ethers } = require("hardhat");
 const hre = require("hardhat");
 
 async function main() {
-  const Academic = await hre.ethers.getContractFactory("Academic");
+  const Academic = await hre.ethers.getContractFactory("Academic", '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
   const academic = await Academic.deploy();
   await academic.deployed();
 
@@ -40,11 +41,17 @@ async function main() {
   const ProfessorContract = await hre.ethers.getContractFactory(
     "ProfessorContract"
   );
-  const professorContract = await ProfessorContract.deploy(academic.address, alunoContract.address, disciplinaContract.address);
+  const professorContract = await ProfessorContract.deploy(academic.address);
   await professorContract.deployed();
   console.log(
     `ProfessorContract contract deployed to ${professorContract.address}`
   );
+
+  const resultProfessorAluno = await professorContract.setAlunoContractAddress(alunoContract.address)
+  await resultProfessorAluno.wait(1)
+
+  const resultProfessorDisciplina = await professorContract.setDisciplinaContractAddress(disciplinaContract.address)
+  await resultProfessorDisciplina.wait(1)
 
   const resultProfessor = await academic.setProfessorContractAddress(
     professorContract.address
@@ -66,6 +73,15 @@ async function main() {
   );
 
   console.log(`Deploy finished with success!`);
+
+  const resultInserirProfessor = await professorContract.inserirProfessor(1, 'Diogo', '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65')
+  console.log(resultInserirProfessor)
+
+  console.log('-----------------------------------------------------------------------------------')
+
+  const newAddressSigner = await ethers.getSigner('0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199')
+  const contratoProfessor1 = professorContract.connect(newAddressSigner)
+  console.log(await contratoProfessor1.inserirNota(1, 1, 5))
 
 }
 

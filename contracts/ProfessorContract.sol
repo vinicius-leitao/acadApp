@@ -15,45 +15,57 @@ contract ProfessorContract is IProfessorContract {
     mapping(uint256 => Disciplina) disciplinaById;
     mapping(uint256 => uint256[]) alunosByDisciplina;
 
-    address owner;
+    address public owner;
 
     address private _academicContractAddr;
     address private _alunoContractAddr;
     address private _disciplinaContractAddr;
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Nao autorizado");
+    modifier onlyAdmin() {
+        require(address(msg.sender) == address(owner), "Apenas o admin pode realizar essa operacao. Transacao revertida");
         _;
     }
 
     modifier onlyProfessor(uint256 disciplinaId) {
         require(
             address(
-                Academic(_academicContractAddr)
+                IDisciplinaContract(_disciplinaContractAddr)
                     .getDisciplinaById(disciplinaId)
                     .professor
-            ) != address(0),
-            "Disciplina sem professor"
+            ) == address(msg.sender),
+            "Apenas o professor da disciplina pode realizar essa operacao. Transacao revertida"
         );
         _;
     }
 
     constructor(
-        address academicContractAddr,
-        address alunoContractAddr,
-        address disciplinaContractAddr
+        address academicContractAddr
     ) {
         _academicContractAddr = academicContractAddr;
-        _alunoContractAddr = alunoContractAddr;
-        _disciplinaContractAddr = disciplinaContractAddr;
         owner = msg.sender;
     }
 
+    function inserirProfessor(uint256 id, string memory nome, address professorAddress) public override onlyAdmin  {
+        require(
+            Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES,
+            "Fora do periodo de inscricao de alunos/professores!"
+        );
+        professorById[id] = Professor(id, nome, professorAddress);
+    }
+
+    function getProfessorById(uint256 id)
+        public
+        override
+        view
+        returns (Professor memory)
+    {
+        return professorById[id];
+    }
 
     function setProfessor(uint256 id, Professor memory professor)
         public
         override
-        onlyOwner
+        onlyAdmin
     {
         professorById[id] = professor;
     }
@@ -62,15 +74,19 @@ contract ProfessorContract is IProfessorContract {
         uint256 alunoId,
         uint256 disciplinaId,
         uint8 nota
-    ) public override onlyProfessor(disciplinaId) {
+    ) public onlyProfessor(disciplinaId) override{
+        console.log(address(msg.sender));
         require(
-            bytes(Academic(_academicContractAddr).getAlunoById(alunoId).nome)
+            bytes(IAlunoContract(_alunoContractAddr).getAlunoById(alunoId).nome)
                 .length != 0,
             "Aluno nao existente!"
         );
-         require(
-            bytes(Academic(_academicContractAddr).getDisciplinaById(disciplinaId).nome)
-                .length != 0,
+        require(
+            bytes(
+                IDisciplinaContract(_disciplinaContractAddr)
+                    .getDisciplinaById(disciplinaId)
+                    .nome
+            ).length != 0,
             "Disciplina nao existente!"
         );
         require(
@@ -103,5 +119,19 @@ contract ProfessorContract is IProfessorContract {
             notas[i] = alunoIdToDisciplinaIdToNota[alunoId][disciplinaId];
         }
         return (alunos, notas);
+    }
+
+    function setAlunoContractAddress(address alunoContractAddr)
+        public
+        onlyAdmin
+    {
+        _alunoContractAddr = alunoContractAddr;
+    }
+
+    function setDisciplinaContractAddress(address disciplinaContractAddr)
+        public
+        onlyAdmin
+    {
+        _disciplinaContractAddr = disciplinaContractAddr;
     }
 }

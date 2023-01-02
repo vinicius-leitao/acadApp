@@ -6,6 +6,7 @@ import "./AcademicTypes.sol";
 import "./Academic.sol";
 import "./IAlunoContract.sol";
 
+
 contract AlunoContract is IAlunoContract{
 
     mapping(uint => Aluno) alunoById;
@@ -14,7 +15,12 @@ contract AlunoContract is IAlunoContract{
     address private _academicContractAddr;
 
     modifier onlyOwner(){
-       require(msg.sender == owner, "Nao autorizado");
+       require(msg.sender == owner, "Nao autorizado. Apenas o Aluno pode concluir essa operacao.");
+       _;
+    }
+
+    modifier onlyAdmin(){
+       require(address(msg.sender) == address(Academic(_academicContractAddr).owner()), "Nao autorizado. Apenas o Admin pode realizar concluir essa operacao");
        _;
     }
 
@@ -27,13 +33,13 @@ contract AlunoContract is IAlunoContract{
         return alunoById[id];
     }
 
-    function inserirAluno(uint id, string memory nome) onlyOwner public override {
+    function inserirAluno(uint id, string memory nome) onlyAdmin public override {
        require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno/professores");
        require(id != 0, "Necessario um id de aluno");
        alunoById[id] = Aluno(id, nome);
     }
 
-    function setAluno(uint id, Aluno memory aluno) onlyOwner public override {
+    function setAluno(uint id, Aluno memory aluno) onlyAdmin public override {
         alunoById[id] = aluno;
     } 
     

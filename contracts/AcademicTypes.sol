@@ -18,11 +18,13 @@ struct Disciplina{
 struct Professor{
     uint id;
     string nome;
+    address professorAddr;
 }
 
 enum Periodo {
     INSCRICAO_ALUNOS_E_PROFESSORES,
-    LANCAMENTO_NOTAS
+    LANCAMENTO_NOTAS,
+    FIM_PERIODO
 }
 
 
