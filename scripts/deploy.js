@@ -74,6 +74,12 @@ async function main() {
 
   console.log(`Deploy finished with success!`);
 
+  const resultAlunoDisciplina = await alunoContract.setDisciplinaContractAddress(disciplinaContract.address);
+  await resultAlunoDisciplina.wait(1);
+  
+  const resultInserirAluno = await alunoContract.inserirAluno(1, "Vinicius", '0xbDA5747bFD65F08deb54cb465eB87D40e51B197E');
+  console.log(await resultInserirAluno);
+
   const resultInserirProfessor = await professorContract.inserirProfessor(1, 'Diogo', '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65')
   await professorContract.inserirProfessor(2, 'Myrna', '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc')
   // console.log(resultInserirProfessor)
@@ -82,23 +88,32 @@ async function main() {
   // console.log(await resultGetProfessor)
 
   console.log('-----------------------------------------------------------------------------------')
+  const resultDisciplinaProfessor = await disciplinaContract.setProfessorContractAddress(professorContract.address)
+  await resultDisciplinaProfessor.wait(1)
 
-  const newAddressSigner = await ethers.getSigner('0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199')
+  const resultDisciplinaAluno = await disciplinaContract.setAlunoContractAddress(alunoContract.address)
+  await resultDisciplinaAluno.wait(1)
+  
+  const contratoDisciplina1 = disciplinaContract.inserirDisciplina(1, 'Blockchain', '0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65', 1)
+  console.log(await contratoDisciplina1)
+  
+  const resultAbrirNotas = academic.abrirLancamentoNota();
+  console.log(await resultAbrirNotas)
+
+  // const newAddressSigner = await ethers.getSigner('0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65')
   // const contratoProfessor1 = professorContract.connect(newAddressSigner)
-  // console.log(await contratoProfessor1.inserirNota(1, 1, 5))
+  // // console.log(await contratoProfessor1.inserirNota(1, 1, 5))
 
   // const contratoDisciplina1 = disciplinaContract.connect(newAddressSigner)
   // console.log(await contratoDisciplina1.inserirDisciplina(1, 'Blockchain', '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199', 1))
 
-  const resultDisciplinaProfessor = await disciplinaContract.setProfessorContractAddress(professorContract.address)
-  await resultDisciplinaProfessor.wait(1)
-
   // const resultProfessorDisciplina = await professorContract.setDisciplinaContractAddress(disciplinaContract.address)
   // await resultProfessorDisciplina.wait(1)
 
-  const contratoDisciplina1 = disciplinaContract.inserirDisciplina(1, 'Blockchain', '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199', 2)
-  console.log(await contratoDisciplina1)
+  // const inscreverDisciplina = await alunoContract.inscreverDisciplina(1, 1);
+  // console.log(await inscreverDisciplina);
 
+  console.log(await disciplinaContract.getAlunosByDisciplina(1));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

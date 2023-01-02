@@ -15,12 +15,6 @@ import "hardhat/console.sol";
 contract Academic {
     Periodo public etapa;
 
-    mapping(uint256 => mapping(uint256 => uint8)) alunoIdToDisciplinaIdToNota;
-    mapping(uint256 => Disciplina) disciplinaById;
-    mapping(uint256 => uint256[]) alunosByDisciplina;
-    mapping(uint256 => Professor) professorById;
-    mapping(uint => Aluno) alunoById;
-
     address public owner;
     address _alunoContractAddr;
     address _disciplinaContractAddr;

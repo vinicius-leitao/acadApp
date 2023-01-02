@@ -11,4 +11,8 @@ interface IDisciplinaContract{
     function setDisciplina(uint id, Disciplina memory disciplina) external;
 
     function getDisciplinaById(uint id) external view returns (Disciplina memory);
+
+    function getAlunosByDisciplina(uint idDisciplina) external view returns (uint256[] memory);
+
+    function pushAlunoToDisciplina(uint idAluno, uint idDisciplina) external;
 }

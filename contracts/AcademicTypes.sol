@@ -5,7 +5,8 @@ pragma solidity >=0.7.0 <0.9.0;
 
 struct Aluno{
     uint id;
-    string nome; 
+    string nome;
+    address aluno;
 }
 
 struct Disciplina{

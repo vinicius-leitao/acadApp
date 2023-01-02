@@ -13,7 +13,6 @@ contract ProfessorContract is IProfessorContract {
     mapping(uint256 => Professor) professorById;
     mapping(uint256 => mapping(uint256 => uint8)) alunoIdToDisciplinaIdToNota;
     mapping(uint256 => Disciplina) disciplinaById;
-    mapping(uint256 => uint256[]) alunosByDisciplina;
 
     address public owner;
 
@@ -75,8 +74,6 @@ contract ProfessorContract is IProfessorContract {
         uint256 disciplinaId,
         uint8 nota
     ) public onlyProfessor(disciplinaId) override{
-        console.log(address(msg.sender));
-        console.log(address(owner));
         require(
             bytes(IAlunoContract(_alunoContractAddr).getAlunoById(alunoId).nome)
                 .length != 0,
@@ -96,7 +93,6 @@ contract ProfessorContract is IProfessorContract {
         );
 
         alunoIdToDisciplinaIdToNota[alunoId][disciplinaId] = nota;
-        alunosByDisciplina[disciplinaId].push(alunoId);
     }
 
     function listarNotasDisciplina(uint256 disciplinaId)
@@ -106,13 +102,13 @@ contract ProfessorContract is IProfessorContract {
         onlyProfessor(disciplinaId)
         returns (Aluno[] memory, uint8[] memory)
     {
-        uint256 numAlunos = alunosByDisciplina[disciplinaId].length;
+        uint256 numAlunos = IDisciplinaContract(_disciplinaContractAddr).getAlunosByDisciplina(disciplinaId).length;
 
         Aluno[] memory alunos = new Aluno[](numAlunos);
         uint8[] memory notas = new uint8[](numAlunos);
 
         for (uint256 i = 0; i < numAlunos; i++) {
-            uint256 alunoId = alunosByDisciplina[disciplinaId][i];
+            uint256 alunoId = IDisciplinaContract(_disciplinaContractAddr).getAlunosByDisciplina(disciplinaId)[i];
 
             alunos[i] = IAlunoContract(_alunoContractAddr).getAlunoById(
                 alunoId

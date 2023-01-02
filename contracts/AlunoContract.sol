@@ -13,14 +13,10 @@ contract AlunoContract is IAlunoContract{
 
     address owner;
     address private _academicContractAddr;
-
-    modifier onlyOwner(){
-       require(msg.sender == owner, "Nao autorizado. Apenas o Aluno pode concluir essa operacao.");
-       _;
-    }
+    address private _disciplinaContractAddr;
 
     modifier onlyAdmin(){
-       require(address(msg.sender) == address(Academic(_academicContractAddr).owner()), "Nao autorizado. Apenas o Admin pode realizar concluir essa operacao");
+       require(address(msg.sender) == address(owner), "Nao autorizado. Apenas o Admin pode realizar concluir essa operacao. Transacao revertida.");
        _;
     }
 
@@ -33,15 +29,26 @@ contract AlunoContract is IAlunoContract{
         return alunoById[id];
     }
 
-    function inserirAluno(uint id, string memory nome) onlyAdmin public override {
+    function inserirAluno(uint id, string memory nome, address alunoAddr) onlyAdmin public override {
        require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno/professores");
        require(id != 0, "Necessario um id de aluno");
-       alunoById[id] = Aluno(id, nome);
+       require(address(alunoAddr) != address(0), "Necessario um endereco de aluno valido");
+       alunoById[id] = Aluno(id, nome, alunoAddr);
     }
 
     function setAluno(uint id, Aluno memory aluno) onlyAdmin public override {
         alunoById[id] = aluno;
-    } 
+    }
+
+    function inscreverDisciplina(uint alunoId, uint disciplinaId) public override{
+      IDisciplinaContract(_disciplinaContractAddr).pushAlunoToDisciplina(alunoId, disciplinaId);
+    }
     
+    function setDisciplinaContractAddress(address disciplinaContractAddr)
+        public
+        onlyAdmin
+    {
+        _disciplinaContractAddr = disciplinaContractAddr;
+    }
 }
 
