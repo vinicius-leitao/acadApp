@@ -76,6 +76,7 @@ contract ProfessorContract is IProfessorContract {
         uint8 nota
     ) public onlyProfessor(disciplinaId) override{
         console.log(address(msg.sender));
+        console.log(address(owner));
         require(
             bytes(IAlunoContract(_alunoContractAddr).getAlunoById(alunoId).nome)
                 .length != 0,

@@ -11,20 +11,15 @@ contract DisciplinaContract is IDisciplinaContract{
 
     mapping(uint => Disciplina) disciplinaById;
 
-    address owner;
+    address public owner;
 
     address _academicContractAddr;
     address _alunoContractAddr;
     address _professorContractAddr;
 
 
-    modifier onlyOwner(){
-       require(msg.sender == owner, "Nao autorizado");
-       _;
-    }
-
     modifier onlyAdmin(){
-       require(address(msg.sender) == address(Academic(_academicContractAddr).owner()), "Nao autorizado. Apenas o Admin pode realizar concluir essa operacao");
+       require(address(msg.sender) == address(owner), "Nao autorizado. Apenas o Admin pode realizar concluir essa operacao. Transacao revertida.");
        _;
     }
 
@@ -37,34 +32,29 @@ contract DisciplinaContract is IDisciplinaContract{
         return disciplinaById[id];
     }
 
-    function inserirDisciplina(uint id, string memory nome, address professor, uint idProfessor) onlyOwner public override {
-<<<<<<< HEAD
+    function inserirDisciplina(uint id, string memory nome, address professor, uint idProfessor) onlyAdmin public override {
        require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno");
-       require(bytes(IProfessorContract(_academicContractAddr).getProfessorById(idProfessor).nome).length != 0, "Professor nao existente");
-=======
-        require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno");
-        require(bytes(Academic(_academicContractAddr).getProfessorById(idProfessor).nome).length != 0, "Professor nao existente");
->>>>>>> 305502929cae14af480f62eb523ae5430fdeec78
+       require(bytes(IProfessorContract(_professorContractAddr).getProfessorById(idProfessor).nome).length != 0, "Professor nao existente");
+       require(address(IProfessorContract(_professorContractAddr).getProfessorById(idProfessor).professorAddr) == address(professor), "O endereco do professor vinculado ao id de professor fornecido nao bate. Transacao revertida");
        
         disciplinaById[id] = Disciplina(id, nome, professor, idProfessor);
     }
 
-    function setDisciplina(uint id, Disciplina memory disciplina) onlyOwner public override {
+    function setDisciplina(uint id, Disciplina memory disciplina) onlyAdmin public override {
         disciplinaById[id] = disciplina;
     } 
 
      function setAlunoContractAddress(address alunoContractAddr)
         public
-        onlyOwner
+        onlyAdmin
     {
         _alunoContractAddr = alunoContractAddr;
     }
 
     function setProfessorContractAddress(address professorContractAddr)
         public
-        onlyOwner
+        onlyAdmin
     {
         _professorContractAddr = professorContractAddr;
     }
-
 }
