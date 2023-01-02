@@ -30,7 +30,7 @@ contract AlunoContract is IAlunoContract{
     }
 
     function inserirAluno(uint id, string memory nome, address alunoAddr) onlyAdmin public override {
-       require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno/professores");
+       require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno/professores. Transacao revertida");
        require(id != 0, "Necessario um id de aluno");
        require(address(alunoAddr) != address(0), "Necessario um endereco de aluno valido");
        alunoById[id] = Aluno(id, nome, alunoAddr);
@@ -41,6 +41,8 @@ contract AlunoContract is IAlunoContract{
     }
 
     function inscreverDisciplina(uint alunoId, uint disciplinaId) public override{
+      require(bytes(IDisciplinaContract(_disciplinaContractAddr).getDisciplinaById(disciplinaId).nome).length != 0, "Disciplina inexistente. Transacao revertida.");
+      require(bytes(getAlunoById(alunoId).nome).length != 0, "Aluno nao existente. Transacao revertida.");
       IDisciplinaContract(_disciplinaContractAddr).pushAlunoToDisciplina(alunoId, disciplinaId);
     }
     
