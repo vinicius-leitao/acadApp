@@ -46,38 +46,37 @@ const Admin = () => {
 
   }, [signer, signerAddress]);
 
-  const abrirLancamentoNotas = async (e) => {
-    const resultAbrirLancamentoNotaWithSigner = await academicContract.abrirLancamentoNota()
-    resultAbrirLancamentoNotaWithSigner.wait(1);
-    console.log(resultAbrirLancamentoNotaWithSigner);
-  }
-
+  
   const inserirProfessor = async (e) => {
     const input = document.getElementsByClassName('card-input')[0]
     const data = input.value
     const [idProfessor, nomeProfessor, enderecoProfessor] = data.split(',')
-    if(idProfessor != "" && nomeProfessor != ""){
+    if(idProfessor !== "" && nomeProfessor !== ""){
       const resultInserirProfessor = await professorContract.inserirProfessor(parseInt(idProfessor), nomeProfessor, enderecoProfessor);
-      const result = resultInserirProfessor.wait(1);
-      console.log(result);
+      resultInserirProfessor.wait(1);
+      console.log(resultInserirProfessor);
+    }
+    else{
+      alert("Please provide a non-blank/valid input information.")
     }
   }
-
+  
   const inserirAluno = async (e) => {
-    e.preventDefault();
     const input = document.getElementsByClassName('card-input')[1]
     const data = input.value
-    const [idAluno, nomeAluno] = data.split(',')
-    if(idAluno != "" && nomeAluno != ""){
-      const resultInserirAluno = await alunoContract.inserirAluno(parseInt(idAluno), nomeAluno);
+    const [idAluno, nomeAluno, enderecoAluno] = data.split(',')
+    if(idAluno !== "" && nomeAluno !== ""){
+      const resultInserirAluno = await alunoContract.inserirAluno(parseInt(idAluno), nomeAluno, enderecoAluno);
       resultInserirAluno.wait(1);
       console.log(resultInserirAluno);
     }
+    else{
+      alert("Please provide a non-blank/valid input information.")
+    }
     
   }
-
+  
   const inserirDisciplina = async (e) => {
-    e.preventDefault();
     const input = document.getElementsByClassName('card-input')[2]
     const data = input.value
     const [idDisciplina, nomeDisciplina, addressProfessor, idProfessor] = data.split(',')
@@ -86,13 +85,35 @@ const Admin = () => {
       resultInserirDisciplina.wait(1);
       console.log(resultInserirDisciplina);
     }
-    
+    else{
+      alert("Please provide a non-blank/valid input information.")
+    }
   }
+
+  const abrirInscricoes = async (e) => {
+    const resultAbrirInscricoes = await academicContract.abrirInscricoes()
+    resultAbrirInscricoes.wait(1);
+    console.log(resultAbrirInscricoes);
+  }
+  
+  const abrirLancamentoNotas = async (e) => {
+    const resultAbrirLancamentoNotaWithSigner = await academicContract.abrirLancamentoNota()
+    resultAbrirLancamentoNotaWithSigner.wait(1);
+    console.log(resultAbrirLancamentoNotaWithSigner)
+  }
+  const fecharPeriodo = async (e) => {
+    const resultFecharPeriodo = await academicContract.fecharPeriodo()
+    resultFecharPeriodo.wait(1);
+    console.log(resultFecharPeriodo);
+  }
+  
     return (
       <div id="content-container">
         <h1 className='content-title'>Página do admin</h1>
         <div className='optionsAvailable'>
           <Card props={{ functionName: "Abrir lançamento de notas" }} action={abrirLancamentoNotas} type="button"></Card>
+          <Card props={{ functionName: "Abrir inscrições" }} action={abrirInscricoes} type="button"></Card>
+          <Card props={{ functionName: "Fechar periodo" }} action={fecharPeriodo} type="button"></Card>
           <Card props={{ functionName: "Inserir Professor" }} action={inserirProfessor} type="input"></Card>
           <Card props={{ functionName: "Inserir Aluno" }} action={inserirAluno} type="input"></Card>
           <Card props={{ functionName: "Inserir Disciplina" }} action={inserirDisciplina} type="input"></Card>

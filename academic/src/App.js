@@ -1,11 +1,10 @@
 import './App.css';
-import {Nav} from './components/Nav';
 import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
+import {Nav} from './components/Nav';
 import Admin from './components/Admin';
 import Professor from './components/Professor';
 import Aluno from './components/Aluno';
-
 
 
 function App() {
@@ -21,6 +20,7 @@ function App() {
             <Route path="/aluno" element={<Aluno/>}/>
           </Routes>
         </div>
+        
     </div>
     </Router>
   );

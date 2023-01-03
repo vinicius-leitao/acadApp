@@ -54,4 +54,12 @@ contract Academic {
     function abrirLancamentoNota() public onlyAdmin {
         etapa = Periodo.LANCAMENTO_NOTAS;
     }
+
+    function fecharPeriodo() public onlyAdmin {
+        etapa = Periodo.FIM_PERIODO;
+    }
+
+    function abrirInscricoes() public onlyAdmin {
+        etapa = Periodo.INSCRICAO_ALUNOS_E_PROFESSORES;
+    }
 }

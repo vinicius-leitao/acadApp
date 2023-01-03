@@ -53,12 +53,6 @@ const Professor = () => {
       console.log(resultListarNotas);
     }
   }
-
-  if (signerAddress != 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc)
-    return (
-      <h1 className="content-title">You're not allowed to see this page.</h1>
-    );
-  else {
     return (
       <div id="content-container">
         <h1 className="content-title">Página do professor</h1>
@@ -68,7 +62,6 @@ const Professor = () => {
         </div>
       </div>
     );
-  }
 };
 
 export default Professor;
