@@ -20,6 +20,16 @@ contract AlunoContract is IAlunoContract{
        _;
     }
 
+     modifier onlyAluno(uint256 id) {
+        require(
+            address(
+                alunoById[id].aluno
+            ) == address(msg.sender),
+            "Apenas o proprio aluno pode realizar essa operacao. Transacao revertida"
+        );
+        _;
+    }
+
     constructor(address academicContractAddr){
        _academicContractAddr = academicContractAddr;
        owner = msg.sender;
@@ -40,7 +50,7 @@ contract AlunoContract is IAlunoContract{
         alunoById[id] = aluno;
     }
 
-    function inscreverDisciplina(uint alunoId, uint disciplinaId) public override{
+    function inscreverDisciplina(uint alunoId, uint disciplinaId) onlyAluno(alunoId) public override{
       require(bytes(IDisciplinaContract(_disciplinaContractAddr).getDisciplinaById(disciplinaId).nome).length != 0, "Disciplina inexistente. Transacao revertida.");
       require(bytes(getAlunoById(alunoId).nome).length != 0, "Aluno nao existente. Transacao revertida.");
       IDisciplinaContract(_disciplinaContractAddr).pushAlunoToDisciplina(alunoId, disciplinaId);
