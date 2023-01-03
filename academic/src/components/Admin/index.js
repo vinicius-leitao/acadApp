@@ -1,21 +1,22 @@
 import React from 'react';
-import { Card } from "./components/Card";
+import { Card } from "../Card";
 import { ethers } from "ethers";
 import { useEffect, useState } from 'react';
-import contractAddrs from './contractsAddrs.json'
+import contractAddrs from '../../contractsAddrs.json'
 
-import './styles/Content.css';
+import '../Content.css';
 
-
-const AcademicAbi = require("./artifacts/contracts/Academic.sol/Academic.json").abi;
-const AlunoAbi = require("./artifacts/contracts/AlunoContract.sol/AlunoContract.json").abi;
-const ProfessorAbi = require("./artifacts/contracts/ProfessorContract.sol/ProfessorContract.json").abi;
-const DisciplinaAbi = require("./artifacts/contracts/DisciplinaContract.sol/DisciplinaContract.json").abi;
+const AcademicAbi = require("../../artifacts/contracts/Academic.sol/Academic.json").abi;
+const AlunoAbi = require("../../artifacts/contracts/AlunoContract.sol/AlunoContract.json").abi;
+const ProfessorAbi = require("../../artifacts/contracts/ProfessorContract.sol/ProfessorContract.json").abi;
+const DisciplinaAbi = require("../../artifacts/contracts/DisciplinaContract.sol/DisciplinaContract.json").abi;
 
 
 const Admin = () => {
 
+  const {AcademicAddr, AlunoContractAddr, ProfessorContractAddr, DisciplinaContractAddr} = contractAddrs
   const [signer, setSigner] = useState()
+  const [signerAddress, setSignerAdress] = useState()
   const [academicContract, setAcademicContract] = useState()
   const [alunoContract, setAlunoContract] = useState()
   const [professorContract, setProfessorContract] = useState()
@@ -23,42 +24,40 @@ const Admin = () => {
 
   useEffect(() => {
 
-    const {AcademicAddr, alunoContractAddr, professorContractAddr, disciplinaContractAddr} = contractAddrs
-
     async function connect() {
+
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       await provider.send("eth_requestAccounts", []);
       const currentSigner = provider.getSigner()
-      setSigner(currentSigner);
-      const academicContractInstance = new ethers.Contract(AcademicAddr, AcademicAbi, provider)
+      setSigner(currentSigner)
+      const signerAddress = await currentSigner.getAddress()
+      setSignerAdress(signerAddress);
+      const academicContractInstance = new ethers.Contract(AcademicAddr, AcademicAbi, currentSigner)
       setAcademicContract(academicContractInstance);
-      const AlunoContractInstance = new ethers.Contract(alunoContractAddr, AlunoAbi, provider)
+      const AlunoContractInstance = new ethers.Contract(AlunoContractAddr, AlunoAbi, currentSigner)
       setAlunoContract(AlunoContractInstance);
-      const ProfessorContractInstance = new ethers.Contract(professorContractAddr, ProfessorAbi, provider)
+      const ProfessorContractInstance = new ethers.Contract(ProfessorContractAddr, ProfessorAbi, currentSigner)
       setProfessorContract(ProfessorContractInstance);
-      const DisciplinaContractInstance = new ethers.Contract(disciplinaContractAddr, DisciplinaAbi, provider)
+      const DisciplinaContractInstance = new ethers.Contract(DisciplinaContractAddr, DisciplinaAbi, currentSigner)
       setDisciplinaContract(DisciplinaContractInstance);
     }
 
     connect();
 
-  }, []);
+  }, [signer, signerAddress]);
 
   const abrirLancamentoNotas = async (e) => {
-    e.preventDefault();
-    const resultAbrirLancamentoNota = await academicContract.abrirLancamentoNota();
-    resultAbrirLancamentoNota.wait(1);
-    console.log(resultAbrirLancamentoNota);
+    const resultAbrirLancamentoNotaWithSigner = await academicContract.abrirLancamentoNota()
+    resultAbrirLancamentoNotaWithSigner.wait(1);
+    console.log(resultAbrirLancamentoNotaWithSigner);
   }
 
   const inserirProfessor = async (e) => {
-    e.preventDefault();
-    const connectToProfessorContract = await professorContract.connect('0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199')
     const input = document.getElementsByClassName('card-input')[0]
     const data = input.value
-    const [idProfessor, nomeProfessor] = data.split(',')
+    const [idProfessor, nomeProfessor, enderecoProfessor] = data.split(',')
     if(idProfessor != "" && nomeProfessor != ""){
-      const resultInserirProfessor = await connectToProfessorContract.inserirProfessor(parseInt(idProfessor), nomeProfessor);
+      const resultInserirProfessor = await professorContract.inserirProfessor(parseInt(idProfessor), nomeProfessor, enderecoProfessor);
       const result = resultInserirProfessor.wait(1);
       console.log(result);
     }

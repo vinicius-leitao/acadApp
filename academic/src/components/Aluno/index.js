@@ -1,7 +1,7 @@
 import React from 'react';
-import {Card} from "./components/Card";
+import {Card} from "../Card";
 
-import './styles/Content.css';
+import '../Content.css';
 
 const Aluno = () =>{
   return (

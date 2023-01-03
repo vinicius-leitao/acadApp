@@ -2,9 +2,9 @@ import './App.css';
 import {Nav} from './components/Nav';
 import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
-import Admin from './Admin';
-import Professor from './Professor';
-import Aluno from './Aluno';
+import Admin from './components/Admin';
+import Professor from './components/Professor';
+import Aluno from './components/Aluno';
 
 
 

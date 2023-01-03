@@ -1,11 +1,11 @@
 import React from "react";
-import { Card } from "./components/Card";
+import { Card } from "../Card";
 import { ethers } from "ethers";
 import { useEffect, useState } from 'react';
 
-import "./styles/Content.css";
+import '../Content.css';
 
-const ProfessorAbi = require("./artifacts/contracts/ProfessorContract.sol/ProfessorContract.json").abi;
+const ProfessorAbi = require("../../artifacts/contracts/ProfessorContract.sol/ProfessorContract.json").abi;
 
 const Professor = () => {
   const ProfessorAddr = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
@@ -32,7 +32,6 @@ const Professor = () => {
   }, [signer]);
 
   const inserirNota = async (e) => {
-    e.preventDefault()
     const input = document.getElementsByClassName('card-input')[0]
     const data = input.value
     const [idAluno, idDisciplina, nota] = data.split(',')
@@ -44,7 +43,6 @@ const Professor = () => {
   }
 
   const listarNotas = async (e) => {
-    e.preventDefault()
     const input = document.getElementsByClassName('card-input')[1]
     const data = input.value
     const idDisciplina = data

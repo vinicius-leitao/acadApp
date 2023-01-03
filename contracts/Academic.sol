@@ -25,33 +25,33 @@ contract Academic {
         owner = msg.sender;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Nao autorizado");
+    modifier onlyAdmin() {
+        require(address(msg.sender) == address(owner), "Somente o admin pode concluir essa operacao. Transacao revertida.");
         _;
     }
 
     function setAlunoContractAddress(address alunoContractAddr)
         public
-        onlyOwner
+        onlyAdmin
     {
         _alunoContractAddr = alunoContractAddr;
     }
 
     function setDisciplinaContractAddress(address disciplinaContractAddr)
         public
-        onlyOwner
+        onlyAdmin
     {
         _disciplinaContractAddr = disciplinaContractAddr;
     }
 
     function setProfessorContractAddress(address professorContractAddr)
         public
-        onlyOwner
+        onlyAdmin
     {
         _professorContractAddr = professorContractAddr;
     }
 
-    function abrirLancamentoNota() public onlyOwner {
+    function abrirLancamentoNota() public onlyAdmin {
         etapa = Periodo.LANCAMENTO_NOTAS;
     }
 }

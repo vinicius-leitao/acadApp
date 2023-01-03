@@ -11,6 +11,7 @@ async function main() {
   const Academic = await hre.ethers.getContractFactory("Academic", '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266');
   const academic = await Academic.deploy();
   await academic.deployed();
+  console.log(academic.signer)
 
   console.log(`Academic contract deployed to ${academic.address}`);
 

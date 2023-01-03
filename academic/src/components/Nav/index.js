@@ -1,5 +1,4 @@
-import '../styles/Nav.css';
-import logo from '../assets/blockchain.png';
+import './Nav.css';
 import { Link, NavLink } from 'react-router-dom';
 
 export function Nav(){
@@ -12,7 +11,7 @@ export function Nav(){
             </NavLink>
 
             <div id="appname">
-                <img src={logo} alt="Logo" />
+                <img src='assets/blockchain.png' alt="Logo" />
                 <span id="appspan">AcadApp</span>
             </div>
         </nav>
