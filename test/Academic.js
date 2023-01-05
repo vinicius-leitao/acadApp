@@ -6,20 +6,7 @@ const {
 describe("Academic", function () {
 
     async function deployContracts() {
-        const AcademicUtils = await hre.ethers.getContractFactory("AcademicUtils");
-        const academicUtils = await AcademicUtils.deploy();
-        await academicUtils.deployed();
-        console.log(
-            `AcademicUtils contract deployed to ${academicUtils.address}`
-        );
-
-        const Academic = await hre.ethers.getContractFactory("Academic"
-        // , {
-        //         libraries: {
-        //         AcademicUtils: academicUtils.address,
-        //         },
-        //     }
-        );
+        const Academic = await hre.ethers.getContractFactory("Academic");
         const academic = await Academic.deploy();
         await academic.deployed();
 
@@ -203,18 +190,6 @@ describe("Academic", function () {
             expect(result.id).to.equal(newProfessor.id)
         });
 
-
-    });
-
-
-
-    describe("AcademicUtils library", function () {
-
-        it("Should sum correctly", async function () {
-            const { academicUtils } = await loadFixture(deployContracts);
-            const result = await academicUtils.soma(1, 3);
-            expect(result).to.equal(4);
-        });
 
     });
 
