@@ -42,12 +42,7 @@ contract AlunoContract is IAlunoContract{
     function inserirAluno(uint id, string memory nome, address alunoAddr) onlyAdmin public override {
        require(Academic(_academicContractAddr).etapa() == Periodo.INSCRICAO_ALUNOS_E_PROFESSORES, "Fora do periodo de inscricao de aluno/professores. Transacao revertida");
        require(id != 0, "Necessario um id de aluno");
-       require(address(alunoAddr) != address(0), "Necessario um endereco de aluno valido");
        alunoById[id] = Aluno(id, nome, alunoAddr);
-    }
-
-    function setAluno(uint id, Aluno memory aluno) onlyAdmin public override {
-        alunoById[id] = aluno;
     }
 
     function inscreverDisciplina(uint alunoId, uint disciplinaId) onlyAluno(alunoId) public override{

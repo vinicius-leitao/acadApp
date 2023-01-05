@@ -8,8 +8,6 @@ interface IDisciplinaContract{
 
     function inserirDisciplina(uint id, string memory nome, address professor, uint idProfessor) external;
 
-    function setDisciplina(uint id, Disciplina memory disciplina) external;
-
     function getDisciplinaById(uint id) external view returns (Disciplina memory);
 
     function getAlunosByDisciplina(uint idDisciplina) external view returns (uint256[] memory);

@@ -90,14 +90,6 @@ contract DisciplinaContract is IDisciplinaContract {
         return alunosByDisciplina[idDisciplina];
     }
 
-    function setDisciplina(uint256 id, Disciplina memory disciplina)
-        public
-        override
-        onlyAdmin
-    {
-        disciplinaById[id] = disciplina;
-    }
-
     function setAlunoContractAddress(address alunoContractAddr)
         public
         onlyAdmin

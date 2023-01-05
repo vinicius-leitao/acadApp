@@ -2,6 +2,7 @@ const { expect, assert } = require("chai");
 const {
     loadFixture,
 } = require("@nomicfoundation/hardhat-network-helpers");
+const { ethers } = require("hardhat");
 
 describe("Academic", function () {
 
@@ -29,7 +30,7 @@ describe("Academic", function () {
         );
 
         const ProfessorContract = await hre.ethers.getContractFactory("ProfessorContract");
-        const professorContract = await ProfessorContract.deploy(academic.address, alunoContract.address, disciplinaContract.address);
+        const professorContract = await ProfessorContract.deploy(academic.address);
         await professorContract.deployed();
         console.log(
             `ProfessorContract contract deployed to ${professorContract.address}`
@@ -66,20 +67,55 @@ describe("Academic", function () {
         console.log(
             `Changed ProfessorContract address in Academic with success!`
         );
+        
+        const resultProfessorAluno = await professorContract.setAlunoContractAddress(alunoContract.address)
+        await resultProfessorAluno.wait(1)
+
+        const resultProfessorDisciplina = await professorContract.setDisciplinaContractAddress(disciplinaContract.address)
+        await resultProfessorDisciplina.wait(1)
+        
+        const resultAlunoDisciplina = await alunoContract.setDisciplinaContractAddress(disciplinaContract.address);
+        await resultAlunoDisciplina.wait(1);
+        
+        const resultDisciplinaProfessor = await disciplinaContract.setProfessorContractAddress(professorContract.address)
+        await resultDisciplinaProfessor.wait(1)
+      
+        const resultDisciplinaAluno = await disciplinaContract.setAlunoContractAddress(alunoContract.address)
+        await resultDisciplinaAluno.wait(1)
 
         console.log(
             `Deploy finished with success!`
         );
 
-        return {academic, alunoContract, professorContract, disciplinaContract, academicUtils, academicToken, academicCertificate};
+        return {academic, alunoContract, professorContract, disciplinaContract, academicToken, academicCertificate};
     }
+
+    describe("Academic Contract", function () {
+
+        it("Should not a non-admin register a student", async function () {
+            const { academic, alunoContract, disciplinaContract, professorContract } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            professorSigner = await ethers.getSigner(professorAddr)
+            
+            await expect(academic.connect(professorSigner).setAlunoContractAddress(alunoContract.address)).to.be.revertedWith('Somente o admin pode concluir essa operacao. Transacao revertida.');
+            await expect(academic.connect(professorSigner).setDisciplinaContractAddress(disciplinaContract.address)).to.be.revertedWith('Somente o admin pode concluir essa operacao. Transacao revertida.');
+            await expect(academic.connect(professorSigner).setProfessorContractAddress(professorContract.address)).to.be.revertedWith('Somente o admin pode concluir essa operacao. Transacao revertida.');
+            await expect(academic.connect(professorSigner).abrirLancamentoNota()).to.be.revertedWith('Somente o admin pode concluir essa operacao. Transacao revertida.');
+            await expect(academic.connect(professorSigner).fecharPeriodo()).to.be.revertedWith('Somente o admin pode concluir essa operacao. Transacao revertida.');
+            await expect(academic.connect(professorSigner).abrirInscricoes()).to.be.revertedWith('Somente o admin pode concluir essa operacao. Transacao revertida.');
+        });
+
+        
+    });
 
     describe("Aluno Contract", function () {
 
         it("Should register and get a valid student", async function () {
             const { alunoContract } = await loadFixture(deployContracts);
 
-            await alunoContract.inserirAluno(1, "Diogo");
+            await alunoContract.inserirAluno(1, "Diogo", '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc');
             const aluno = await alunoContract.getAlunoById(1);
             expect(aluno.nome).to.equal("Diogo");
             expect(aluno.id).to.equal(1)
@@ -88,22 +124,50 @@ describe("Academic", function () {
         it("Should not register a student, when is out of registration period", async function () {
             const { academic, alunoContract } = await loadFixture(deployContracts);
             await academic.abrirLancamentoNota();
-            await expect(alunoContract.inserirAluno(1, "Diogo")).to.be.revertedWith('Fora do periodo de inscricao de aluno/professores');
+            await expect(alunoContract.inserirAluno(1, "Diogo", "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc")).to.be.revertedWith('Fora do periodo de inscricao de aluno/professores. Transacao revertida');
         });
 
         it("Should not register a student with invalid id", async function () {
             const { alunoContract } = await loadFixture(deployContracts);
-            await expect(alunoContract.inserirAluno(0, "Diogo")).to.be.revertedWith('Necessario um id de aluno');
+            await expect(alunoContract.inserirAluno(0, "Diogo", "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc")).to.be.revertedWith('Necessario um id de aluno');
         });
 
-        it("Should set a valid student", async function () {
+        it("Should not register a student in discipline, when the signer isn't a student.", async function () {
+
+            const { professorContract, alunoContract, disciplinaContract } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await alunoContract.inserirAluno(1, "Vini", aluno1Addr);
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
+
+
+            professorSigner = await ethers.getSigner(professorAddr)
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+            
+            await expect(alunoContract.connect(professorSigner).inscreverDisciplina(1, 1)).to.be.revertedWith('Apenas o proprio aluno pode realizar essa operacao. Transacao revertida');
+
+        });
+
+        it("Should not a non-admin register a student", async function () {
             const { alunoContract } = await loadFixture(deployContracts);
 
-            const newStudent = {id: 2, nome: "Vini"}
-            await alunoContract.setAluno(2, newStudent);
-            const aluno = await alunoContract.getAlunoById(2);
-            expect(aluno.nome).to.equal("Vini");
-            expect(aluno.id).to.equal(2)
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            professorSigner = await ethers.getSigner(professorAddr)
+            await expect(alunoContract.connect(professorSigner).inserirAluno(1, "Diogo", '0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc')).to.be.revertedWith('Nao autorizado. Apenas o Admin pode realizar concluir essa operacao. Transacao revertida.');
+        });
+
+        it("Should not a student register in an invalid discipline", async function () {
+            const { alunoContract } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const aluno1Addr = signers[18].address
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+            await alunoContract.inserirAluno(1, "Diogo", aluno1Addr)
+            await expect(alunoContract.connect(aluno1Signer).inscreverDisciplina(1,2)).to.be.revertedWith('Disciplina inexistente. Transacao revertida.');
         });
 
     });
@@ -111,44 +175,105 @@ describe("Academic", function () {
     describe("Disciplina Contract", function () {
 
         it("Should register and get a valid discipline", async function () {
-            const { academic, disciplinaContract } = await loadFixture(deployContracts);
-            const [professor] = await hre.ethers.getSigners();
+            const { disciplinaContract, professorContract } = await loadFixture(deployContracts);
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+
             
-            await academic.inserirProfessor(1, "Diogo");
-            await disciplinaContract.inserirDisciplina(1, "Blockchain", professor.address, 1);
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
             const disciplina = await disciplinaContract.getDisciplinaById(1);
             
             expect(disciplina.id).to.equal(1)
             expect(disciplina.nome).to.equal("Blockchain");
-            expect(disciplina.professor).to.equal(professor.address)
+            expect(disciplina.professor).to.equal(professorAddr)
             expect(disciplina.idProfessor).to.equal(1);
         });
 
         it("Should not register a discipline, when is out of registration period", async function () {
-            const { academic, disciplinaContract } = await loadFixture(deployContracts);
-            const [professor] = await hre.ethers.getSigners();
-            await academic.inserirProfessor(1, "Diogo");
+            const { academic, disciplinaContract, professorContract } = await loadFixture(deployContracts);
 
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
             await academic.abrirLancamentoNota();
-            await expect(disciplinaContract.inserirDisciplina(1, "Blockchain", professor.address, 1)).to.be.revertedWith('Fora do periodo de inscricao de aluno');
+            await expect(disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1)).to.be.revertedWith('Fora do periodo de inscricao de aluno');
         });
 
         it("Should not register a discipline, when professor is invalid", async function () {
             const { disciplinaContract } = await loadFixture(deployContracts);
-            const [professor] = await hre.ethers.getSigners();
 
-            await expect(disciplinaContract.inserirDisciplina(1, "Blockchain", professor.address, 1)).to.be.revertedWith('Professor nao existente');
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+
+            await expect(disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1)).to.be.revertedWith('Professor nao existente');
         });
 
-        it("Should set a valid discipline", async function () {
-            const { disciplinaContract } = await loadFixture(deployContracts);
-            const [professor] = await hre.ethers.getSigners();
+        it("Should not a non-admin set discipline contract", async function () {
+            const {alunoContract, disciplinaContract} = await loadFixture(deployContracts);
 
-            const newDiscipline = {id: 1, nome: "Blockchain", professor: professor.address, idProfessor: 1 }
-            await disciplinaContract.setDisciplina(2, newDiscipline);
-            const disciplina = await disciplinaContract.getDisciplinaById(2);
-            expect(disciplina.nome).to.equal("Blockchain");
-            expect(disciplina.id).to.equal(1)
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            professorSigner = await ethers.getSigner(professorAddr)
+            
+            
+            await expect(disciplinaContract.connect(professorSigner).setAlunoContractAddress(alunoContract.address)).to.be.revertedWith('Nao autorizado. Apenas o Admin pode realizar concluir essa operacao. Transacao revertida.');
+        });
+
+        it("Should not a non-admin set professor contract", async function () {
+            const {professorContract, disciplinaContract} = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            professorSigner = await ethers.getSigner(professorAddr)
+            
+            
+            await expect(disciplinaContract.connect(professorSigner).setProfessorContractAddress(professorContract.address)).to.be.revertedWith('Nao autorizado. Apenas o Admin pode realizar concluir essa operacao. Transacao revertida.');
+        });
+
+        it("Should not a non-admin insert a discipline", async function () {
+            const {professorContract, disciplinaContract} = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            professorSigner = await ethers.getSigner(professorAddr)
+            
+            
+            await expect(disciplinaContract.connect(professorSigner).inserirDisciplina(1, 'Blockchain', professorAddr, 1)).to.be.revertedWith('Nao autorizado. Apenas o Admin pode realizar concluir essa operacao. Transacao revertida.');
+        });
+    
+
+        it("Should not insert a discipline, when the professor address and professor id is not the same professor", async function () {
+            const {professorContract, disciplinaContract} = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const professor2Addr = signers[18].address
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr)
+            professorSigner = await ethers.getSigner(professorAddr)
+            
+            
+            await expect(disciplinaContract.inserirDisciplina(1, 'Blockchain', professor2Addr, 1)).to.be.revertedWith('O endereco do professor vinculado ao id de professor fornecido nao bate. Transacao revertida');
+        });
+
+        it("Should not a non-admin insert a discipline", async function () {
+            const {professorContract, disciplinaContract, alunoContract} = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            const aluno2Addr = signers[17].address
+
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await alunoContract.inserirAluno(1, "Vini", aluno1Addr);
+            await alunoContract.inserirAluno(2, "Lucas", aluno2Addr);
+    
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
+
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+
+            await expect(alunoContract.connect(aluno1Signer).inscreverDisciplina(1, 4)).to.be.revertedWith('Disciplina inexistente. Transacao revertida.')
         });
 
     });
@@ -158,39 +283,196 @@ describe("Academic", function () {
 
         it("Should a professor be able to insert a grade", async function () {
 
-            const { academic, professorContract } = await loadFixture(deployContracts);
-            const [professor] = await hre.ethers.getSigners();
+            const { academic, professorContract, alunoContract, disciplinaContract } = await loadFixture(deployContracts);
 
-            await academic.inserirProfessor(1, "Diogo");
-            await academic.inserirAluno(1, "Vini");
-            await academic.inserirAluno(2, "Lucas");
-            
-            await academic.inserirDisciplina(1, "Blockchain", professor.address, 1);
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            const aluno2Addr = signers[17].address
+
+            await academic.abrirInscricoes()
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await alunoContract.inserirAluno(1, "Vini", aluno1Addr);
+            await alunoContract.inserirAluno(2, "Lucas", aluno2Addr);
+    
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
             await academic.abrirLancamentoNota();
 
-            await professorContract.inserirNota(1, 1, 8);
-            await professorContract.inserirNota(2, 1, 6);
+            professorSigner = await ethers.getSigner(professorAddr)
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+            aluno2Signer = await ethers.getSigner(aluno2Addr)
 
-            const [alunos, notas] = await professorContract.listarNotasDisciplina(1);
             
-            expect(alunos[0].nome).to.equal("");
+
+            await alunoContract.connect(aluno1Signer).inscreverDisciplina(1, 1);
+            await alunoContract.connect(aluno2Signer).inscreverDisciplina(2, 1);
+
+            await professorContract.connect(professorSigner).inserirNota(1, 1, 8);
+            await professorContract.connect(professorSigner).inserirNota(2, 1, 6);
+
+            
+            const [alunos, notas] = await professorContract.connect(professorSigner).listarNotasDisciplina(1);
+            console.log(await professorContract.connect(professorSigner).listarNotasDisciplina(1))
+
+            await academic.fecharPeriodo()
+            
+            expect(alunos[0].nome).to.equal("Vini");
             expect(notas[0]).to.equal(8);
-            expect(alunos[1].nome).to.equal("");
+            expect(alunos[1].nome).to.equal("Lucas");
             expect(notas[1]).to.equal(6);
+
         });
 
-        it("Should set a valid professor", async function () {
+
+        it("Should not a non-admin register a professor", async function () {
+
             const { professorContract } = await loadFixture(deployContracts);
 
-            const newProfessor = {id: 1, nome: "Diogo"}
-            await professorContract.setProfessor(1, newProfessor);
-            const result = await professorContract.getProfessor(1);
-            
-            expect(result.nome).to.equal(newProfessor.nome);
-            expect(result.id).to.equal(newProfessor.id)
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            const aluno2Addr = signers[17].address
+
+            professorSigner = await ethers.getSigner(professorAddr)
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+            aluno2Signer = await ethers.getSigner(aluno2Addr)
+
+            await expect(professorContract.connect(professorSigner).inserirProfessor(1, "Diogo", professorAddr)).to.be.revertedWith('Apenas o admin pode realizar essa operacao. Transacao revertida');
         });
 
+        it("Should not a non-professor be able to list a grade", async function () {
 
+            const { academic, professorContract, alunoContract, disciplinaContract } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            const aluno2Addr = signers[17].address
+
+            await academic.abrirInscricoes()
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await alunoContract.inserirAluno(1, "Vini", aluno1Addr);
+            await alunoContract.inserirAluno(2, "Lucas", aluno2Addr);
+    
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
+            await academic.abrirLancamentoNota();
+
+            professorSigner = await ethers.getSigner(professorAddr)
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+            aluno2Signer = await ethers.getSigner(aluno2Addr)
+
+            
+
+            await alunoContract.connect(aluno1Signer).inscreverDisciplina(1, 1);
+            await alunoContract.connect(aluno2Signer).inscreverDisciplina(2, 1);
+
+            await professorContract.connect(professorSigner).inserirNota(1, 1, 8);
+            await professorContract.connect(professorSigner).inserirNota(2, 1, 6);
+
+            await expect(professorContract.connect(aluno1Signer).listarNotasDisciplina(1)).to.be.revertedWith('Apenas o professor da disciplina pode realizar essa operacao. Transacao revertida');
+        });
+
+        it("Should not a non-professor be able to insert a grade", async function () {
+
+            const { academic, professorContract, alunoContract, disciplinaContract } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            const aluno2Addr = signers[17].address
+
+            await academic.abrirInscricoes()
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await alunoContract.inserirAluno(1, "Vini", aluno1Addr);
+            await alunoContract.inserirAluno(2, "Lucas", aluno2Addr);
+    
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
+            await academic.abrirLancamentoNota();
+
+            professorSigner = await ethers.getSigner(professorAddr)
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+            aluno2Signer = await ethers.getSigner(aluno2Addr)
+
+            await alunoContract.connect(aluno1Signer).inscreverDisciplina(1, 1);
+            await alunoContract.connect(aluno2Signer).inscreverDisciplina(2, 1);
+
+            await expect(professorContract.connect(aluno1Signer).inserirNota(1, 1, 8)).to.be.revertedWith('Apenas o professor da disciplina pode realizar essa operacao. Transacao revertida');
+        });
+
+        it("Should not insert a grade of a unexistent student", async function () {
+            const { academic, professorContract, alunoContract, disciplinaContract } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await alunoContract.inserirAluno(1, "Vini", aluno1Addr);
+    
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
+            await academic.abrirLancamentoNota();
+
+            professorSigner = await ethers.getSigner(professorAddr)
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+
+            await alunoContract.connect(aluno1Signer).inscreverDisciplina(1, 1);
+
+            await expect(professorContract.connect(professorSigner).inserirNota(2, 1, 8)).to.be.revertedWith('Aluno nao existente!');
+        });
+        
+
+        it("Should not insert a grade when period isn't lancamento_notas", async function () {
+
+            const { professorContract, disciplinaContract, alunoContract } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const alunoAddr = signers[18].address
+            await professorContract.inserirProfessor(1, "Diogo", professorAddr);
+            await disciplinaContract.inserirDisciplina(1, "Blockchain", professorAddr, 1);
+            await alunoContract.inserirAluno(1, "Vinicius", alunoAddr);
+
+            professorSigner = await ethers.getSigner(professorAddr)
+            await expect(professorContract.connect(professorSigner).inserirNota(1,1,8)).to.be.revertedWith('Fora do periodo de lancamento de notas!')
+        });
+
+        it("Should not register a professor, when is out of register period", async function () {
+
+            const { professorContract, academic } = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            const aluno1Addr = signers[18].address
+            const aluno2Addr = signers[17].address
+
+            professorSigner = await ethers.getSigner(professorAddr)
+            aluno1Signer = await ethers.getSigner(aluno1Addr)
+            aluno2Signer = await ethers.getSigner(aluno2Addr)
+
+            await academic.fecharPeriodo()
+            await expect(professorContract.inserirProfessor(1, "Diogo", professorAddr)).to.be.revertedWith('Fora do periodo de inscricao de alunos/professores!');
+        });
+
+        it("Should not a non-admin set disciplina contract", async function () {
+            const {professorContract, disciplinaContract} = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            professorSigner = await ethers.getSigner(professorAddr)
+            
+            
+            await expect(professorContract.connect(professorSigner).setDisciplinaContractAddress(disciplinaContract.address)).to.be.revertedWith('Apenas o admin pode realizar essa operacao. Transacao revertida');
+        });
+
+        it("Should not a non-admin set aluno contract", async function () {
+            const {professorContract, alunoContract} = await loadFixture(deployContracts);
+
+            const signers = await hre.ethers.getSigners()
+            const professorAddr = signers[19].address
+            professorSigner = await ethers.getSigner(professorAddr)
+            
+            
+            await expect(professorContract.connect(professorSigner).setAlunoContractAddress(alunoContract.address)).to.be.revertedWith('Apenas o admin pode realizar essa operacao. Transacao revertida');
+        });
     });
 
 

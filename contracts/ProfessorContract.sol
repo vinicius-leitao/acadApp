@@ -61,14 +61,6 @@ contract ProfessorContract is IProfessorContract {
         return professorById[id];
     }
 
-    function setProfessor(uint256 id, Professor memory professor)
-        public
-        override
-        onlyAdmin
-    {
-        professorById[id] = professor;
-    }
-
     function inserirNota(
         uint256 alunoId,
         uint256 disciplinaId,
@@ -78,14 +70,6 @@ contract ProfessorContract is IProfessorContract {
             bytes(IAlunoContract(_alunoContractAddr).getAlunoById(alunoId).nome)
                 .length != 0,
             "Aluno nao existente!"
-        );
-        require(
-            bytes(
-                IDisciplinaContract(_disciplinaContractAddr)
-                    .getDisciplinaById(disciplinaId)
-                    .nome
-            ).length != 0,
-            "Disciplina nao existente!"
         );
         require(
             Academic(_academicContractAddr).etapa() == Periodo.LANCAMENTO_NOTAS,

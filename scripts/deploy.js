@@ -99,7 +99,7 @@ async function main() {
 
   // const newAddressSigner = await ethers.getSigner('0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65')
   // const contratoProfessor1 = professorContract.connect(newAddressSigner)
-  // // console.log(await contratoProfessor1.inserirNota(1, 1, 5))
+  // console.log(await contratoProfessor1.inserirNota(1, 1, 5))
 
   // const contratoDisciplina1 = disciplinaContract.connect(newAddressSigner)
   // console.log(await contratoDisciplina1.inserirDisciplina(1, 'Blockchain', '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199', 1))
